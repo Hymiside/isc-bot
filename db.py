@@ -119,4 +119,3 @@ def check_db_exists():
 
 
 check_db_exists()
-# print(now.strftime("%A"))
