@@ -1,3 +1,13 @@
+create table homework(
+    id integer primary key not null,
+    subject text not null,
+    title text not null,
+    created_at TIMESTAMP DATE DEFAULT (date('now')),
+    deadline text,
+    user_id integer not null,
+    school_id integer not null references schools(id)
+);
+
 create table users(
     id integer primary key not null,
     username text,
@@ -11,15 +21,6 @@ create table schools(
     school_name text not null,
     class_name text not null,
     editor_token text not null
-);
-
-create table homework(
-    id integer primary key not null,
-    subject text not null,
-    title text not null,
-    created_at TIMESTAMP DATE DEFAULT (date('now')),
-    user_id integer not null,
-    school_id integer not null references schools(id)
 );
 
 create table timetable(

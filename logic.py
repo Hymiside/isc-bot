@@ -7,6 +7,7 @@ class Homework(NamedTuple):
     id: int
     subject: str
     homework: str
+    deadline: str
     created_at: date
 
 
@@ -42,15 +43,16 @@ def add_user_profile(username: str, school_id: int, user_id: int):
     db.get_add_user_profile(values)
 
 
-def add_homework(subject: str, title: str, user_id: int, school_id: int):
-    values = (subject, title, user_id, *school_id)
+def add_homework(subject: str, title: str, deadline: str, user_id: int, school_id: int):
+    values = (subject, title, deadline, user_id, *school_id)
     db.get_add_homework(values)
 
 
 def view_homework(school_id: int):
     all_homework_not_format = db.get_view_homework(school_id)
     all_homework = [Homework(id=tuple_homework[0], subject=tuple_homework[1], homework=tuple_homework[2],
-                             created_at=tuple_homework[3]) for tuple_homework in all_homework_not_format]
+                    created_at=tuple_homework[3], deadline=tuple_homework[4])
+                    for tuple_homework in all_homework_not_format]
     return all_homework
 
 

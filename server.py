@@ -9,7 +9,7 @@ import keyboard
 import logic
 import db
 
-bot = Bot(token='')
+bot = Bot(token='1930144367:AAEYBFJtPJ1WgmXidCb8mnVYDfmToz4D5bA')
 dp = Dispatcher(bot)
 
 logging.basicConfig(level=logging.INFO)
@@ -73,19 +73,8 @@ async def add_homework(callback_query: types.CallbackQuery):
                                             'зарегистрироваться.')
 
 
-@dp.callback_query_handler(text='russian')
-@dp.callback_query_handler(text='literature')
-@dp.callback_query_handler(text='algebra')
-@dp.callback_query_handler(text='geometry')
-@dp.callback_query_handler(text='physics')
-@dp.callback_query_handler(text='informatics')
-@dp.callback_query_handler(text='chemistry')
-@dp.callback_query_handler(text='english')
-@dp.callback_query_handler(text='biology')
-@dp.callback_query_handler(text='astronomy')
-@dp.callback_query_handler(text='obg')
-@dp.callback_query_handler(text='history')
-@dp.callback_query_handler(text='sport')
+@dp.callback_query_handler(text=['russian', 'literature', 'algebra', 'geometry', 'physics', 'informatics', 'chemistry',
+                                 'english', 'biology', 'astronomy', 'obg', 'history', 'sport'])
 async def input_subject(callback_query: types.CallbackQuery):
     """Ловим коллбэк с предметом и кладем его в глобальную переменную, чтобы потом его записать в БД"""
     global subject
@@ -120,12 +109,27 @@ async def input_subject(callback_query: types.CallbackQuery):
 @dp.message_handler(lambda message: message.text.startswith('*'))
 async def input_homework(message: types.Message):
     """Получаем текст домашенего задания и записываем его в БД"""
-    user_id = message.from_user.id
+    global homework
     homework = message.text.strip('*').strip()
 
+    return await message.answer('📱Выберите день недели на который задано ДЗ', reply_markup=keyboard.deadline())
+
+
+@dp.callback_query_handler(text=['dl_mon', 'dl_tue', 'dl_wed', 'dl_thu', 'dl_fri'])
+async def deadline_homework(callback_query: types.CallbackQuery):
+    dict_day = {
+        'dl_mon': 'Понедельник',
+        'dl_tue': 'Вторник',
+        'dl_wed': 'Среда',
+        'dl_thu': 'Четверг',
+        'dl_fri': 'Пятница'
+    }
+    deadline = dict_day[callback_query.data]
+
+    user_id = callback_query.from_user.id
     school_id = logic.return_school_id(user_id)
-    logic.add_homework(subject, homework, user_id, school_id)
-    return await message.answer('✅Домашнее задание добавлено', reply_markup=keyboard.main_keyboard())
+    logic.add_homework(subject, homework, deadline, user_id, school_id)
+    return await callback_query.message.answer('✅Домашнее задание добавлено', reply_markup=keyboard.main_keyboard())
 
 
 @dp.callback_query_handler(text='view_homework')
@@ -144,9 +148,10 @@ async def view_homework(callback_query: types.CallbackQuery):
                                                    reply_markup=keyboard.main_keyboard())
 
     list_homework = [
-        f'Предмет: {homework.subject}\nЗадание: {homework.homework}\nЗаписано: '
-        f'{homework.created_at.split("-")[2]}.{homework.created_at.split("-")[1]}.{homework.created_at.split("-")[0]} '
-        f'- чтобы удалить, нажми /delete{homework.id}' for homework in all_homework]
+        f'Предмет:  {homework.subject}\nЗадание:  {homework.homework}\nДедлайн:  {homework.deadline}\n'
+        f'Записано:  '
+        f'{homework.created_at.split("-")[2]}.{homework.created_at.split("-")[1]}.{homework.created_at.split("-")[0]}' 
+        f' - чтобы удалить, нажми /delete{homework.id}' for homework in all_homework]
 
     return await callback_query.message.answer('📖Домашнее задание📖\n\n' + "\n\n".join(list_homework),
                                                reply_markup=keyboard.main_keyboard())
@@ -276,13 +281,7 @@ async def enter_timetable(callback_query: types.CallbackQuery):
                                                reply_markup=keyboard.timetable())
 
 
-@dp.callback_query_handler(text='Monday')
-@dp.callback_query_handler(text='Tuesday')
-@dp.callback_query_handler(text='Wednesday')
-@dp.callback_query_handler(text='Thursday')
-@dp.callback_query_handler(text='Friday')
-@dp.callback_query_handler(text='Saturday')
-@dp.callback_query_handler(text='Sunday')
+@dp.callback_query_handler(text=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
 async def watch_timetable(callback_query: types.CallbackQuery):
     list_day = {
         'Monday': 'Понедельник',

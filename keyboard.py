@@ -66,6 +66,19 @@ def timetable():
     return keyboard
 
 
+def deadline():
+    list_button = [
+        types.InlineKeyboardButton(text='Понедельник', callback_data='dl_mon'),
+        types.InlineKeyboardButton(text='Вторник', callback_data='dl_tue'),
+        types.InlineKeyboardButton(text='Среда', callback_data='dl_wed'),
+        types.InlineKeyboardButton(text='Четверг', callback_data='dl_thu'),
+        types.InlineKeyboardButton(text='Пятница', callback_data='dl_fri')
+    ]
+    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard.add(*list_button)
+    return keyboard
+
+
 def get_day_of_week():
     """Возвращает настоящий день недели"""
     json_data = requests.get('http://worldclockapi.com/api/json/utc/now').json()

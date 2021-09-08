@@ -26,13 +26,13 @@ def get_add_user_profile(values: Tuple):
 
 def get_add_homework(values: Tuple):
     """Добавляет новое домашнее задание"""
-    cursor.execute(f"INSERT INTO homework(subject, title, user_id, school_id) VALUES(?, ?, ?, ?);", values)
+    cursor.execute(f"INSERT INTO homework(subject, title, deadline, user_id, school_id) VALUES(?, ?, ?, ?, ?);", values)
     conn.commit()
 
 
 def get_view_homework(school_id: int):
     """Возвращает все домашнее задание по school_id"""
-    cursor.execute(f"SELECT id, subject, title, created_at FROM homework WHERE school_id={school_id}")
+    cursor.execute(f"SELECT id, subject, title, created_at, deadline FROM homework WHERE school_id={school_id}")
     return cursor.fetchall()
 
 
