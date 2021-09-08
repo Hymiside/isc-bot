@@ -9,7 +9,7 @@ import keyboard
 import logic
 import db
 
-bot = Bot(token='1930144367:AAEYBFJtPJ1WgmXidCb8mnVYDfmToz4D5bA')
+bot = Bot(token='')
 dp = Dispatcher(bot)
 
 logging.basicConfig(level=logging.INFO)
