@@ -1,6 +1,6 @@
 from typing import NamedTuple
 from datetime import date
-import db
+from utils import db
 
 
 class Homework(NamedTuple):

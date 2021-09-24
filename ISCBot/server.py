@@ -5,9 +5,9 @@ import string
 
 from aiogram import Bot, Dispatcher, types, executor
 
-import keyboard
+from utils import keyboard
 import logic
-import db
+from utils import db
 
 bot = Bot(token='')
 dp = Dispatcher(bot)
@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 async def new_send_welcome(message: types.Message):
     user_id = message.from_user.id
     user_status = logic.check_user_profile(user_id)
+    schools = db.return_all_schools()
 
     if user_status:
         await message.answer('📱Для взаимодествия с ботом, используй меню кнопок👇',
@@ -31,12 +32,12 @@ async def new_send_welcome(message: types.Message):
             await message.answer(
                 f'🙋‍♂️Привет, {username}!\nНажми на кнопку класса в котором ты учишься. Если твоего класса'
                 f' нет в списке — нажми кнопку зарегистрировать класс и следуй инструкции.',
-                reply_markup=keyboard.all_schools())
+                reply_markup=keyboard.all_schools(schools))
         else:
             await message.answer(
                 f'🙋‍♂️Привет!\nНажми на кнопку класса в котором ты учишься. Если твоего класса'
                 f' нет в списке — нажми кнопку зарегистрировать класс и следуй инструкции.',
-                reply_markup=keyboard.all_schools())
+                reply_markup=keyboard.all_schools(schools))
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('cls'))

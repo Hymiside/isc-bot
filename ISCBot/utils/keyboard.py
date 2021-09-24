@@ -2,7 +2,6 @@ import requests
 
 from aiogram import types
 
-import db
 from datetime import datetime
 
 now = datetime.now()
@@ -43,8 +42,7 @@ def homework_keyboard():
     return keyboard
 
 
-def all_schools():
-    schools = db.return_all_schools()
+def all_schools(schools: list):
     list_button = [types.InlineKeyboardButton(text=f'🏫{i[1]}  {i[2]}', callback_data=f'cls{i[0]}') for i in schools]
     list_button.append(types.InlineKeyboardButton(text='📝Зарегистрировать класс', callback_data='create_new_class'))
     keyboard = types.InlineKeyboardMarkup(row_width=1)
