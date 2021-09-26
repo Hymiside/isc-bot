@@ -48,9 +48,10 @@ async def registration(callback_query: types.CallbackQuery):
     username = callback_query.from_user.username
 
     logic.add_user_profile(username, school_id, user_id)
-    return await callback_query.message.answer(
+    await callback_query.message.answer(
         '🤍Спасибо за регистрацию!🤍\n\n📱Для взаимодействия с ботом, используй меню кнопок👇',
         reply_markup=keyboard.main_keyboard())
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text='add_homework')
@@ -72,6 +73,7 @@ async def add_homework(callback_query: types.CallbackQuery):
     elif not role:
         await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
                                             'зарегистрироваться.')
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text=['russian', 'literature', 'algebra', 'geometry', 'physics', 'informatics', 'chemistry',
@@ -84,8 +86,9 @@ async def input_subject(callback_query: types.CallbackQuery):
     school_id = logic.return_school_id(user_id)
 
     if not school_id:
-        return await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
-                                                   'зарегистрироваться.')
+        await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
+                                            'зарегистрироваться.')
+        await callback_query.answer()
 
     subjects_dict = {
         'russian': 'Русский язык',
@@ -105,6 +108,7 @@ async def input_subject(callback_query: types.CallbackQuery):
     subject_key = callback_query.data
     subject = subjects_dict[subject_key]
     await callback_query.message.answer('💁‍♂️Теперь вводи домашнее задание, но в начале добавь *')
+    await callback_query.answer()
 
 
 @dp.message_handler(lambda message: message.text.startswith('*'))
@@ -113,7 +117,7 @@ async def input_homework(message: types.Message):
     global homework
     homework = message.text.strip('*').strip()
 
-    return await message.answer('📱Выберите день недели на который задано ДЗ', reply_markup=keyboard.deadline())
+    await message.answer('📱Выберите день недели на который задано ДЗ', reply_markup=keyboard.deadline())
 
 
 @dp.callback_query_handler(text=['dl_mon', 'dl_tue', 'dl_wed', 'dl_thu', 'dl_fri'])
@@ -130,7 +134,8 @@ async def deadline_homework(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     school_id = logic.return_school_id(user_id)
     logic.add_homework(subject, homework, deadline, user_id, school_id)
-    return await callback_query.message.answer('✅Домашнее задание добавлено', reply_markup=keyboard.main_keyboard())
+    await callback_query.message.answer('✅Домашнее задание добавлено', reply_markup=keyboard.main_keyboard())
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text='view_homework')
@@ -139,14 +144,15 @@ async def view_homework(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     user_status = logic.check_user_profile(user_id)
     if not user_status:
-        return await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
-                                                   'зарегистрироваться.')
+        await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
+                                            'зарегистрироваться.')
+
     school_id = logic.return_school_id(user_id)
     all_homework = logic.view_homework(*school_id)
 
     if not all_homework:
-        return await callback_query.message.answer('📖Домашнего задания нет📖\nКайфуй🤍',
-                                                   reply_markup=keyboard.main_keyboard())
+        await callback_query.message.answer('📖Домашнего задания нет📖\nКайфуй🤍',
+                                            reply_markup=keyboard.main_keyboard())
 
     list_homework = [
         f'Предмет:  {homework.subject}\nЗадание:  {homework.homework}\nДедлайн:  {homework.deadline}\n'
@@ -154,8 +160,9 @@ async def view_homework(callback_query: types.CallbackQuery):
         f'{homework.created_at.split("-")[2]}.{homework.created_at.split("-")[1]}.{homework.created_at.split("-")[0]}' 
         f' - чтобы удалить, нажми /delete{homework.id}' for homework in all_homework]
 
-    return await callback_query.message.answer('📖Домашнее задание📖\n\n' + "\n\n".join(list_homework),
-                                               reply_markup=keyboard.main_keyboard())
+    await callback_query.message.answer('📖Домашнее задание📖\n\n' + "\n\n".join(list_homework),
+                                        reply_markup=keyboard.main_keyboard())
+    await callback_query.answer()
 
 
 @dp.message_handler(lambda message: message.text.startswith('/del'))
@@ -167,17 +174,17 @@ async def delete_homework(message: types.Message):
     if role == ['Редактор']:
         row_id = int(message.text[7:])
         db.get_delete_homework(row_id)
-        return await message.answer('✅Домашнее задание удалено', reply_markup=keyboard.main_keyboard())
+        await message.answer('✅Домашнее задание удалено', reply_markup=keyboard.main_keyboard())
 
     elif role == ['Читатель']:
-        return await message.answer('🙅‍♂️Твой уровень — Читатель🙅‍♂️\nУдалить ДЗ может только Редактор!'
-                                    ' Чтобы повысить уровень, нажми на кнопку "Ввести код Редактора" и '
-                                    'введи код Редактора. Если возникли проблемы, обратись к @hymiside.',
-                                    reply_markup=keyboard.main_keyboard())
+        await message.answer('🙅‍♂️Твой уровень — Читатель🙅‍♂️\nУдалить ДЗ может только Редактор!'
+                             ' Чтобы повысить уровень, нажми на кнопку "Ввести код Редактора" и '
+                             'введи код Редактора. Если возникли проблемы, обратись к @hymiside.',
+                             reply_markup=keyboard.main_keyboard())
 
     elif not role:
-        return await message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
-                                    'зарегистрироваться.')
+        await message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
+                             'зарегистрироваться.')
 
 
 @dp.callback_query_handler(text='enter_code')
@@ -190,12 +197,13 @@ async def enter_editor_token(callback_query: types.CallbackQuery):
         await callback_query.message.answer('💁‍♂️Теперь вводи код Редактора')
 
     elif role == ['Редактор']:
-        return await callback_query.message.answer('🙅‍♂️Твой уровень — Редактор🙅‍♂️\n Дальше только БОГ, но это не '
+        await callback_query.message.answer('🙅‍♂️Твой уровень — Редактор🙅‍♂️\n Дальше только БОГ, но это не '
                                                    'ко мне)', reply_markup=keyboard.main_keyboard())
 
     elif not role:
-        return await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
+        await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
                                                    'зарегистрироваться.')
+    await callback_query.answer()
 
 
 @dp.message_handler(lambda message: message.text.startswith('editor'))
@@ -212,25 +220,26 @@ async def input_editor_token(message: types.Message):
 
     if status_editor_token:
         db.get_update_user_role(id)
-        return await message.answer('✅Твой уровень повышен до Редактора✅\n\n'
+        await message.answer('✅Твой уровень повышен до Редактора✅\n\n'
                                     'Теперь ты можешь добавлять и удалять ДЗ, а также создавать различные '
                                     'ивенты', reply_markup=keyboard.main_keyboard())
 
     elif not status_editor_token:
-        return await message.answer('🛑Такого кода Редактора не существует. Обратись к @hymiside.🛑')
+        await message.answer('🛑Такого кода Редактора не существует. Обратись к @hymiside.🛑')
 
 
 @dp.callback_query_handler(text='pay')
 async def donate(callback_query: types.CallbackQuery):
     """Гыыыыы, донатики"""
     button = types.InlineKeyboardButton(text="Помочь с деньгами", url='https://yoomoney.ru/to/4100117051898846')
-    keyboard = types.InlineKeyboardMarkup(row_width=1)
-    keyboard.add(button)
+    keyboard_ = types.InlineKeyboardMarkup(row_width=1)
+    keyboard_.add(button)
 
-    return await callback_query.message.answer('Сейчас я содержу бота на свои накопления, но ты можешь помочь — '
-                                               'задонатить на оплату сервера, маркетинг, создание контента и '
-                                               'дальнейшее развитие бота!\n\n'
-                                               '🤍Спасибо, что пользуешься Домашка.Бот🤍', reply_markup=keyboard)
+    await callback_query.message.answer('Сейчас я содержу бота на свои накопления, но ты можешь помочь — '
+                                        'задонатить на оплату сервера, маркетинг, создание контента и '
+                                        'дальнейшее развитие бота!\n\n'
+                                        '🤍Спасибо, что пользуешься Домашка.Бот🤍', reply_markup=keyboard_)
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text='logout')
@@ -238,8 +247,9 @@ async def logout(callback_query: types.CallbackQuery):
     """Пользователь выходит из класса и бот удаляет его из БД"""
     user_id = callback_query.from_user.id
     db.get_logout(user_id)
-    return await callback_query.message.answer('✅Ты успешно вышел из своего класса✅\nЧтобы снова начать пользоваться '
-                                               'ботом — нажми /start.')
+    await callback_query.message.answer('✅Ты успешно вышел из своего класса✅\nЧтобы снова начать пользоваться '
+                                        'ботом — нажми /start.')
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text='create_newsletter')
@@ -252,14 +262,15 @@ async def create_newsletter(callback_query: types.CallbackQuery):
         await callback_query.message.answer('💁‍♂️Теперь вводи текст для рассылки, но в начале добавь &')
 
     elif role == ['Читатель']:
-        return await callback_query.message.answer(
+        await callback_query.message.answer(
             '🙅‍♂️Твой уровень — Читатель🙅‍♂️\nСоздать рассылку может только Редактор!'
             ' Чтобы повысить уровень, нажми на кнопку "Ввести код Редактора" и '
             'введи код Редактора. Если возникли проблемы, обратись к @hymiside.',
             reply_markup=keyboard.main_keyboard())
     elif not role:
-        return await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
-                                                   'зарегистрироваться.')
+        await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
+                                            'зарегистрироваться.')
+    await callback_query.answer()
 
 
 @dp.message_handler(lambda message: message.text.startswith('&'))
@@ -277,9 +288,9 @@ async def input_newsletter(message: types.Message):
 
 @dp.callback_query_handler(text='view_timetable')
 async def enter_timetable(callback_query: types.CallbackQuery):
-    return await callback_query.message.answer('Выбери на какой день ты хочешь посмотреть расписание и нажми на'
-                                               ' кнопку🔘',
-                                               reply_markup=keyboard.timetable())
+    await callback_query.message.answer('Выбери на какой день ты хочешь посмотреть расписание и нажми на'
+                                        ' кнопку🔘', reply_markup=keyboard.timetable())
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
@@ -295,12 +306,12 @@ async def watch_timetable(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
     role = logic.check_user_role(user_id)
     if not role:
-        return await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
-                                                   'зарегистрироваться.')
+        await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
+                                            'зарегистрироваться.')
 
     day = callback_query.data
     if day == 'Saturday' or day == 'Sunday':
-        return await callback_query.message.answer('Сегодня выходной💁‍♂️📆',
+        await callback_query.message.answer('Сегодня выходной💁‍♂️📆',
                                                    reply_markup=keyboard.main_keyboard())
     school_id = db.return_school_id(user_id)
 
@@ -308,29 +319,31 @@ async def watch_timetable(callback_query: types.CallbackQuery):
     count = 1
     list_timetable = []
     if not all_timetable:
-        return await callback_query.message.answer('🙅‍♂️У тебя еще нет расписания🙅‍♂️\nНо не переживай, оно скоро '
+        await callback_query.message.answer('🙅‍♂️У тебя еще нет расписания🙅‍♂️\nНо не переживай, оно скоро '
                                                    'появится.', reply_markup=keyboard.main_keyboard())
 
     for timetable in all_timetable:
         list_timetable.append(f'{count}. {timetable.subject}  {timetable.time}')
         count += 1
 
-    return await callback_query.message.answer(f'📌Расписание на {list_day[day]}📌\n\n' + "\n".join(list_timetable),
-                                               reply_markup=keyboard.main_keyboard())
+    await callback_query.message.answer(f'📌Расписание на {list_day[day]}📌\n\n' + "\n".join(list_timetable),
+                                        reply_markup=keyboard.main_keyboard())
+    await callback_query.answer()
 
 
 @dp.callback_query_handler(text='create_new_class')
 async def create_new_class(callback_query: types.CallbackQuery):
-    return await callback_query.message.answer("<b>Введи название школы в формате</b>\nШкола: "
-                                               "«название»\n\n<b>Пример</b>\nШкола: Школа 153",
-                                               parse_mode=types.ParseMode.HTML)
+    await callback_query.message.answer("<b>Введи название школы в формате</b>\nШкола: "
+                                        "«название»\n\n<b>Пример</b>\nШкола: Школа 153",
+                                        parse_mode=types.ParseMode.HTML)
+    await callback_query.answer()
 
 
 @dp.message_handler(lambda message: message.text.startswith('Школа:'))
 async def input_school_name(message: types.Message):
     global school_name
     school_name = message.text[7:].strip()
-    return await message.answer("<b>Теперь введи свой класс в формате</b>\nКласс: «название»\n\n<b>Пример</b>\nКласс: "
+    await message.answer("<b>Теперь введи свой класс в формате</b>\nКласс: «название»\n\n<b>Пример</b>\nКласс: "
                                 "9Б", parse_mode=types.ParseMode.HTML)
 
 
@@ -342,7 +355,7 @@ async def input_class_name(message: types.Message):
     values = (school_name, class_name, editor_token)
     db.add_new_class(values)
 
-    return await message.answer('✅Твой класс зарегистрирован\n\n'
+    await message.answer('✅Твой класс зарегистрирован\n\n'
                                 f'<b>Код Редактора: {editor_token}.</b> Этот код понадобится тебе чтобы повысить '
                                 f'уровень пользователя до Редактора, после этого ты сможешь добавлять домашнее задание '
                                 f'и создавать рассылки.\nНажми /start чтобы войти.', parse_mode=types.ParseMode.HTML)
@@ -351,7 +364,7 @@ async def input_class_name(message: types.Message):
 @dp.message_handler()
 async def other(message: types.Message):
     """Отлавливаем всякий текст из сообщений и типо не распознаем его"""
-    return await message.answer('🤷Я тебя не понимаю🤷\nEcли возникли проблемы обратись к @hymiside.')
+    await message.answer('🤷Я тебя не понимаю🤷\nEcли возникли проблемы обратись к @hymiside.')
 
 
 if __name__ == '__main__':
