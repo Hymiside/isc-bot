@@ -198,11 +198,11 @@ async def enter_editor_token(callback_query: types.CallbackQuery):
 
     elif role == ['Редактор']:
         await callback_query.message.answer('🙅‍♂️Твой уровень — Редактор🙅‍♂️\n Дальше только БОГ, но это не '
-                                                   'ко мне)', reply_markup=keyboard.main_keyboard())
+                                            'ко мне)', reply_markup=keyboard.main_keyboard())
 
     elif not role:
         await callback_query.message.answer('❗Ты не зарегистрирован или удален❗\n Нажми /start, чтобы '
-                                                   'зарегистрироваться.')
+                                            'зарегистрироваться.')
     await callback_query.answer()
 
 
@@ -221,8 +221,8 @@ async def input_editor_token(message: types.Message):
     if status_editor_token:
         db.get_update_user_role(id)
         await message.answer('✅Твой уровень повышен до Редактора✅\n\n'
-                                    'Теперь ты можешь добавлять и удалять ДЗ, а также создавать различные '
-                                    'ивенты', reply_markup=keyboard.main_keyboard())
+                             'Теперь ты можешь добавлять и удалять ДЗ, а также создавать различные '
+                             'ивенты', reply_markup=keyboard.main_keyboard())
 
     elif not status_editor_token:
         await message.answer('🛑Такого кода Редактора не существует. Обратись к @hymiside.🛑')
@@ -311,8 +311,7 @@ async def watch_timetable(callback_query: types.CallbackQuery):
 
     day = callback_query.data
     if day == 'Saturday' or day == 'Sunday':
-        await callback_query.message.answer('Сегодня выходной💁‍♂️📆',
-                                                   reply_markup=keyboard.main_keyboard())
+        await callback_query.message.answer('Сегодня выходной💁‍♂️📆', reply_markup=keyboard.main_keyboard())
     school_id = db.return_school_id(user_id)
 
     all_timetable = logic.return_timetable(day, *school_id)
@@ -320,7 +319,7 @@ async def watch_timetable(callback_query: types.CallbackQuery):
     list_timetable = []
     if not all_timetable:
         await callback_query.message.answer('🙅‍♂️У тебя еще нет расписания🙅‍♂️\nНо не переживай, оно скоро '
-                                                   'появится.', reply_markup=keyboard.main_keyboard())
+                                            'появится.', reply_markup=keyboard.main_keyboard())
 
     for timetable in all_timetable:
         list_timetable.append(f'{count}. {timetable.subject}  {timetable.time}')
@@ -344,7 +343,7 @@ async def input_school_name(message: types.Message):
     global school_name
     school_name = message.text[7:].strip()
     await message.answer("<b>Теперь введи свой класс в формате</b>\nКласс: «название»\n\n<b>Пример</b>\nКласс: "
-                                "9Б", parse_mode=types.ParseMode.HTML)
+                         "9Б", parse_mode=types.ParseMode.HTML)
 
 
 @dp.message_handler(lambda message: message.text.startswith('Класс:'))
